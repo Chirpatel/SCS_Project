@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 
 const errorController = require('./controllers/error');
-// const User = require('./models/user');
+const User = require('./models/user');
 
 const app = express();
 
@@ -18,25 +18,39 @@ const shopRoutes = require('./routes/shop');
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// app.use((req, res, next) => {
-//   User.findById('5baa2528563f16379fc8a610')
-//     .then(user => {
-//       req.user = new User(user.name, user.email, user.cart, user._id);
-//       next();
-//     })
-//     .catch(err => console.log(err));
-// });
+app.use((req, res, next) => {
+  User.findById('5bab316ce0a7c75f783cb8a8')
+    .then(user => {
+      req.user = user;
+      next();
+    })
+    .catch(err => console.log(err));
+});
 
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
 
 app.use(errorController.get404);
 
-
 mongoose.connect('mongodb+srv://first:satyam@2812@cluster0-ziri6.mongodb.net/shop?retryWrites=true&w=majority', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 }).then(result => {
+   
+    User.findOne().then(user => {
+      if(!user){
+        const user  = new User({
+          name : 'Satyam',
+          email : 'satyams2812@gmail.com',
+          cart : {
+            items: []
+          }
+          
+        });
+        user.save();      
+      }
+    })
+   
   app.listen(3000);
   console.log('Server at 3000')
   console.log('Database is Connected');
